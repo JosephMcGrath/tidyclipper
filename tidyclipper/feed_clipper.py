@@ -50,10 +50,10 @@ class FeedClipper:
             print(url)
             self.add_feed(url)
 
-    def make_clipping(self, regex: str, file: str) -> None:
+    def make_clipping(self, title: str, regex: str, file: str) -> None:
         """
         Make a HTML clipping from from entries matching the provided regex.
         """
         entries = self.database.search(regex)
         with open(file, "w", encoding="utf-8") as output:
-            output.write(CLIPPING.render(entries=entries, title=file, pattern=regex))
+            output.write(CLIPPING.render(entries=entries, title=title, pattern=regex))

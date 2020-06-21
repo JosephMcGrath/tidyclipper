@@ -17,6 +17,9 @@ def sanitise_html(html: str) -> str:
 
     Intended to return HTML that can be embeded in a larger document.
     """
+    if html is None:
+        return ""
+
     # Wipe out unwwanted tags entirely
     html = re.sub(r"<\/?html>", "", html)
     html = re.sub(r"<\/?body>", "", html)
@@ -34,12 +37,10 @@ def sanitise_html(html: str) -> str:
 
     # Don't want most attributes
     for tag in soup.recursiveChildGenerator():
-        try:
+        if hasattr(tag, "attrs"):
             tag.attrs = {
                 key: value for key, value in tag.attrs.items() if key == "href"
             }
-        except AttributeError:
-            pass
 
     output = soup.prettify()
     output = re.sub(r"<(\/?)h1>", r"<\1h3>", output)
