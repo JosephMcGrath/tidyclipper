@@ -33,7 +33,7 @@ class FeedClipper:
         new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
         self.database.write_entries(new_entries)
 
-    def add_feeds(self, urls: List[str]):
+    def add_feeds(self, urls: List[str]) -> None:
         """
         Clips all entries in a list of feed URLs.
         """
@@ -41,10 +41,10 @@ class FeedClipper:
             print(url)
             self.add_feed(url)
 
-    def refetch(self, mode="standard"):
+    def refetch(self, sorting: str = "standard") -> None:
         """
         Fetch all feeds that are already in the database.
         """
-        for url in self.database.get_feeds(mode):
+        for url in self.database.get_feeds(sorting):
             print(url)
             self.add_feed(url)

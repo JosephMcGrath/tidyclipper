@@ -35,7 +35,7 @@ class FeedEntry:
     @classmethod
     def from_rss(
         cls, entry: feedparser.FeedParserDict, feed: feedparser.FeedParserDict
-    ):
+    ) -> "FeedEntry":
         """
         Converts a feedparser entry / feed into a FeedEntry.
         """
@@ -52,7 +52,9 @@ class FeedEntry:
             source=feed.get("href"),
         )
 
-    def __init__(self, title, summary, link, time, feed, source):
+    def __init__(
+        self, title: str, summary: str, link: str, time: str, feed: str, source: str
+    ):
         self.title = title.strip()
         self.summary = summary
         self.link = link
@@ -65,13 +67,13 @@ class FeedEntry:
         except TypeError:
             pass
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.link)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Feed Entry : {self.title[:50]}>"
 
-    def as_markdown(self):
+    def as_markdown(self) -> str:
         """
         Convert the feed entry to a simple markdown output format.
         """

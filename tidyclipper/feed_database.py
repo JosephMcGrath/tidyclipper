@@ -20,7 +20,7 @@ class FeedDatabase:
 
         self._make_tables()
 
-    def _make_tables(self):
+    def _make_tables(self) -> None:
         statements = [
             """
         CREATE TABLE IF NOT EXISTS entry(
@@ -71,20 +71,20 @@ class FeedDatabase:
                     (feed, datetime.datetime.now().isoformat()),
                 )
 
-    def get_feeds(self, mode="standard") -> List[str]:
+    def get_feeds(self, sorting: str = "standard") -> List[str]:
         """
         Get a list of feeds from the database. Entries are sorted by the longest time
         since they've been searched (or random if "shuffle" is specified).
         """
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
-            if mode == "standard":
+            if sorting == "standard":
                 cur.execute("SELECT url FROM feed ORDER BY last_fetched ASC;")
-            elif mode == "shuffle":
+            elif sorting == "shuffle":
                 cur.execute("SELECT url FROM feed ORDER BY RANDOM();")
             return [x[0] for x in cur.fetchall()]
 
-    def search(self, regex: str):
+    def search(self, regex: str) -> List[FeedEntry]:
         """
         Searches the database for any entries that match the provided regex.
         """
