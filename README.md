@@ -20,7 +20,27 @@ clipper.make_clipping(
 
 ----
 
-For repeated runs, a config file can be passed in, see ``config_example`` for an example of the expected format:
+For repeated runs, a config file can be passed in, see ``config_example.json`` for an example of the expected format:
+
+```json
+{
+    "database": "feeds.db",
+    "new_feeds": [
+        "http://feeds.bbci.co.uk/news/rss.xml"
+    ],
+    "refetch": true,
+    "clippings": [
+        {
+            "title": "hound of the baskervilles",
+            "regex": "(?i)hound of the baskervilles",
+            "file": "Hound.html"
+        }
+    ]
+}
+```
+
+Then calling:
+
 
 ```py
 import tidyclipper
