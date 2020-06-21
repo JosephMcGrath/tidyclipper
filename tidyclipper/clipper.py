@@ -1,5 +1,8 @@
+"""
+Downloads, cleans up and stores entries from RSS feeds.
+"""
+
 import datetime
-import random
 import re
 import sqlite3
 from typing import List
@@ -28,10 +31,17 @@ def sanitise_html(html: str) -> str:
 
 
 class FeedEntry:
+    """
+    A single entry from an RSS feed.
+    """
+
     @classmethod
-    def from_entry(
+    def from_rss(
         cls, entry: feedparser.FeedParserDict, feed: feedparser.FeedParserDict
     ):
+        """
+        Converts a feedparser entry / feed into a FeedEntry.
+        """
         try:
             time = datetime.datetime(*entry.published_parsed[:6]).isoformat()
         except (AttributeError, TypeError):
@@ -65,10 +75,20 @@ class FeedEntry:
         return f"<Feed Entry : {self.title[:50]}>"
 
     def as_markdown(self):
-        return f"## {self.title}\n\n* {self.time}\n* {self.feed}\n* {self.link}\n\n{self.summary}\n\n---"
+        """
+        Convert the feed entry to a simple markdown output format.
+        """
+        output = f"## {self.title}\n\n"
+        output += f"* {self.time}\n* {self.feed}\n* {self.link}\n\n"
+        output += f"{self.summary}\n\n---"
+        return output
 
 
 class FeedDatabase:
+    """
+    Manages a database containing feed entries.
+    """
+
     def __init__(self, file: str):
         self.file = file
 
@@ -96,6 +116,9 @@ class FeedDatabase:
                 cur.execute(statment)
 
     def write_entries(self, entries: List[FeedEntry]) -> None:
+        """
+        Write a list of entries to the database.
+        """
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             for entry in entries:
@@ -123,6 +146,10 @@ class FeedDatabase:
                 )
 
     def get_feeds(self, mode="standard") -> List[str]:
+        """
+        Get a list of feeds from the database. Entries are sorted by the longest time
+        since they've been searched (or random if "shuffle" is specified).
+        """
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             if mode == "standard":
@@ -132,8 +159,11 @@ class FeedDatabase:
             return [x[0] for x in cur.fetchall()]
 
     def search(self, regex: str):
+        """
+        Searches the database for any entries that match the provided regex.
+        """
         pattern = re.compile(regex)
-        output = []
+        output: List[FeedEntry] = []
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             for row in cur.execute(
@@ -146,26 +176,39 @@ class FeedDatabase:
 
 
 class FeedClipper:
+    """
+    Downloads and saves entries from RSS feeds.
+    """
+
     def __init__(self, database: FeedDatabase):
         self.session = requests.session()
         self.database = database
 
     def add_feed(self, url: str) -> None:
+        """
+        Adds a new feed to the database and then clips it.
+        """
         try:
             raw = self.session.get(url, timeout=1)
             feed = feedparser.parse(raw.text)
         except:
             return
         feed["href"] = raw.url
-        new_entries = [FeedEntry.from_entry(x, feed) for x in feed.entries]
+        new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
         self.database.write_entries(new_entries)
 
     def add_feeds(self, urls: List[str]):
+        """
+        Clips all entries in a list of feed URLs.
+        """
         for url in urls:
             print(url)
             self.add_feed(url)
 
-    def recycle(self, mode="standard"):
+    def refetch(self, mode="standard"):
+        """
+        Fetch all feeds that are already in the database.
+        """
         for url in self.database.get_feeds(mode):
             print(url)
             self.add_feed(url)
