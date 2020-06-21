@@ -9,6 +9,7 @@ import requests
 
 from .feed_database import FeedDatabase
 from .feed_entry import FeedEntry
+from .templates import CLIPPING
 
 
 class FeedClipper:
@@ -54,5 +55,5 @@ class FeedClipper:
         Make a HTML clipping from from entries matching the provided regex.
         """
         entries = self.database.search(regex)
-        with open(file, "w", encoding="utf-8") as f:
-            f.write("\n".join([x.as_html() for x in entries]))
+        with open(file, "w", encoding="utf-8") as output:
+            output.write(CLIPPING.render(entries=entries, title=file, pattern=regex))

@@ -8,6 +8,8 @@ import re
 import feedparser
 from bs4 import BeautifulSoup
 
+from .templates import ENTRY
+
 
 def sanitise_html(html: str) -> str:
     """
@@ -104,16 +106,5 @@ class FeedEntry:
         """
         Formats the feed entry to a snippet of HTML.
         """
-        output = [
-            '<span class = "entry">',
-            f"<h2>{self.title}</h2>",
-            "<ul>",
-            f"<li>Time: {self.time}</li>",
-            f"<li>Feed: {self.feed}</li>",
-            f'<li>Link: <a href="{self.link}">Link</a></li>',
-            "</ul>",
-            sanitise_html(self.summary),
-            "</hr>",
-            "</span>",
-        ]
-        return "\n".join(output)
+        self.summary = sanitise_html(self.summary)
+        return ENTRY.render(entry=self)
