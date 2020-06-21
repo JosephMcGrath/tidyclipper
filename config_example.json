@@ -1,0 +1,14 @@
+{
+    "database": "feeds.db",
+    "new_feeds": [
+        "http://feeds.bbci.co.uk/news/rss.xml"
+    ],
+    "refetch": true,
+    "clippings": [
+        {
+            "title": "hound of the baskervilles",
+            "regex": "(?i)hound of the baskervilles",
+            "file": "Hound.html"
+        }
+    ]
+}
