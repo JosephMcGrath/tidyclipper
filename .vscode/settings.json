@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "D:\\Anaconda3\\envs\\tidyclipper\\python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.formatting.provider": "black",
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
+}
