@@ -26,18 +26,24 @@ class FeedDatabase:
     def _make_tables(self) -> None:
         statements = [
             """
-        CREATE TABLE IF NOT EXISTS entry(
-            title TEXT
-          , feed TEXT
-          , link TEXT PRIMARY KEY
-          , time TEXT
-          , source TEXT
-          , summary TEXT
-        );
-        """,
+            CREATE TABLE IF NOT EXISTS entry(
+                title TEXT
+            , feed TEXT
+            , link TEXT PRIMARY KEY
+            , time TEXT
+            , source TEXT
+            , summary TEXT
+            );
+            """,
             "CREATE INDEX IF NOT EXISTS title_idx ON entry(title);",
             "CREATE INDEX IF NOT EXISTS summary_idx ON entry(summary);",
-            "CREATE TABLE IF NOT EXISTS feed (url TEXT PRIMARY KEY, last_fetched TEXT NOT NULL);",
+            """
+            CREATE TABLE IF NOT EXISTS feed (
+                url TEXT PRIMARY KEY
+              , last_fetched TEXT NOT NULL
+              , to_fetch INTEGER DEFAULT(1)
+            );
+            """,
         ]
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
@@ -87,10 +93,24 @@ class FeedDatabase:
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             if sorting == "standard":
-                cur.execute("SELECT url FROM feed ORDER BY last_fetched ASC;")
+                cur.execute(
+                    "SELECT url FROM feed WHERE to_fetch = 1 ORDER BY last_fetched ASC;"
+                )
             elif sorting == "shuffle":
-                cur.execute("SELECT url FROM feed ORDER BY RANDOM();")
+                cur.execute(
+                    "SELECT url FROM feed WHERE to_fetch = 1 ORDER BY RANDOM();"
+                )
             return [x[0] for x in cur.fetchall()]
+
+    def deactivate_feed(self, feed_url) -> None:
+        """
+        Set a feed to inactive.
+        """
+        logger = logging.getLogger(self.log_name)
+        logger.debug("Deactivating feed: %s.", feed_url)
+        with sqlite3.connect(self.file) as conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE feed SET to_fetch = 0 WHERE url = ?;", (feed_url,))
 
     def search(self, regex: str) -> List[FeedEntry]:
         """
