@@ -3,11 +3,13 @@ Tools to store feed entries in an SQLite database.
 """
 
 import datetime
+import logging
 import re
 import sqlite3
 from typing import List
 
 from .feed_entry import FeedEntry
+from .logs import LOG_NAME
 
 
 class FeedDatabase:
@@ -16,6 +18,7 @@ class FeedDatabase:
     """
 
     def __init__(self, file: str):
+        self.log_name = LOG_NAME + ".FeedDatabase"
         self.file = file
 
         self._make_tables()
@@ -45,6 +48,8 @@ class FeedDatabase:
         """
         Write a list of entries to the database.
         """
+        logger = logging.getLogger(self.log_name)
+        logger.debug("Writing %s logs to disc.", len(entries))
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             for entry in entries:
@@ -63,6 +68,7 @@ class FeedDatabase:
                     ),
                 )
             for feed in {x.source for x in entries}:
+                logger.debug("Updaing fetched status of %s.", feed)
                 cur.execute(
                     """
                     INSERT OR REPLACE INTO feed
@@ -76,6 +82,8 @@ class FeedDatabase:
         Get a list of feeds from the database. Entries are sorted by the longest time
         since they've been searched (or random if "shuffle" is specified).
         """
+        logger = logging.getLogger(self.log_name)
+        logger.debug("Getting list of available feeds.")
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             if sorting == "standard":
@@ -88,6 +96,8 @@ class FeedDatabase:
         """
         Searches the database for any entries that match the provided regex.
         """
+        logger = logging.getLogger(self.log_name)
+        logger.debug("Searching database for entries matching %s.", regex)
         pattern = re.compile(regex)
         output: List[FeedEntry] = []
         with sqlite3.connect(self.file) as conn:
@@ -98,4 +108,5 @@ class FeedDatabase:
                 if re.search(pattern, row[0] or "") or re.search(pattern, row[1] or ""):
                     temp = {x[0]: y for x, y in zip(cur.description, row)}
                     output.append(FeedEntry(**temp))
+        logger.debug("Found %s entries.", len(output))
         return output
