@@ -48,3 +48,11 @@ class FeedClipper:
         for url in self.database.get_feeds(sorting):
             print(url)
             self.add_feed(url)
+
+    def make_clipping(self, regex: str, file: str) -> None:
+        """
+        Make a HTML clipping from from entries matching the provided regex.
+        """
+        entries = self.database.search(regex)
+        with open(file, "w", encoding="utf-8") as f:
+            f.write("\n".join([x.as_html() for x in entries]))

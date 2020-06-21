@@ -15,15 +15,33 @@ def sanitise_html(html: str) -> str:
 
     Intended to return HTML that can be embeded in a larger document.
     """
+    # Wipe out unwwanted tags entirely
+    html = re.sub(r"<\/?html>", "", html)
+    html = re.sub(r"<\/?body>", "", html)
+    html = re.sub(r"<\/?div>", "", html)
+    html = re.sub(r"<\/?span>", "", html)
+
+    html = re.sub(r"(\s)+", r"\1", html)
+
     soup = BeautifulSoup(html, "lxml")
 
-    for tag in ["img", "script", "embed", "iframe"]:
+    # Don't want these tags:
+    for tag in ["img", "script", "embed", "iframe", "hr"]:
         for entry in soup.findAll(tag):
             entry.extract()
 
-    output = str(soup)
-    output = re.sub(r"^<\/?html>", "", output)
-    output = re.sub(r"^<\/?body>", "", output)
+    # Don't want most attributes
+    for tag in soup.recursiveChildGenerator():
+        try:
+            tag.attrs = {
+                key: value for key, value in tag.attrs.items() if key == "href"
+            }
+        except AttributeError:
+            pass
+
+    output = soup.prettify()
+    output = re.sub(r"<(\/?)h1>", r"<\1h3>", output)
+    output = re.sub(r"<(\/?)h2>", r"<\1h3>", output)
     return output
 
 
@@ -81,3 +99,21 @@ class FeedEntry:
         output += f"* {self.time}\n* {self.feed}\n* {self.link}\n\n"
         output += f"{self.summary}\n\n---"
         return output
+
+    def as_html(self) -> str:
+        """
+        Formats the feed entry to a snippet of HTML.
+        """
+        output = [
+            '<span class = "entry">',
+            f"<h2>{self.title}</h2>",
+            "<ul>",
+            f"<li>Time: {self.time}</li>",
+            f"<li>Feed: {self.feed}</li>",
+            f'<li>Link: <a href="{self.link}">Link</a></li>',
+            "</ul>",
+            sanitise_html(self.summary),
+            "</hr>",
+            "</span>",
+        ]
+        return "\n".join(output)
