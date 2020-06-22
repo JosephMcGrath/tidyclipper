@@ -14,7 +14,7 @@ clipper = tidyclipper.FeedClipper(database)
 clipper.add_feed(r"http://feeds.bbci.co.uk/news/rss.xml")
 
 clipper.make_clipping(
-    "hound of the baskervilles", r"(?i)hound of the baskervilles", "Hound.html"
+    "hound of the baskervilles", [r"(?i)hound of the baskervilles"], "Hound.html"
 )
 ```
 
@@ -32,7 +32,7 @@ For repeated runs, a config file can be passed in, see ``config_example.json`` f
     "clippings": [
         {
             "title": "hound of the baskervilles",
-            "regex": "(?i)hound of the baskervilles",
+            "regex": ["(?i)hound of the baskervilles"],
             "file": "Hound.html"
         }
     ]
