@@ -7,7 +7,7 @@
     "clippings": [
         {
             "title": "hound of the baskervilles",
-            "regex": "(?i)hound of the baskervilles",
+            "regex": ["(?i)hound of the baskervilles"],
             "file": "Hound.html"
         }
     ]

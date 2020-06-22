@@ -112,20 +112,25 @@ class FeedDatabase:
             cur = conn.cursor()
             cur.execute("UPDATE feed SET to_fetch = 0 WHERE url = ?;", (feed_url,))
 
-    def search(self, regex: str) -> List[FeedEntry]:
+    def search(self, regex: List[str]) -> List[FeedEntry]:
         """
         Searches the database for any entries that match the provided regex.
         """
         logger = logging.getLogger(self.log_name)
         logger.debug("Searching database for entries matching %s.", regex)
-        pattern = re.compile(regex)
+        patterns = [re.compile(x) for x in regex]
         output: List[FeedEntry] = []
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             for row in cur.execute(
                 "SELECT title, summary, link, time, feed, source FROM entry ORDER BY time DESC;"
             ):
-                if re.search(pattern, row[0] or "") or re.search(pattern, row[1] or ""):
+                if any(
+                    [
+                        re.search(x, row[0] or "") or re.search(x, row[1] or "")
+                        for x in patterns
+                    ]
+                ):
                     temp = {x[0]: y for x, y in zip(cur.description, row)}
                     output.append(FeedEntry(**temp))
         logger.debug("Found %s entries.", len(output))
