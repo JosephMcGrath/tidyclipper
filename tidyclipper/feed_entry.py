@@ -4,6 +4,7 @@ Tools to manage individual entries from RSS feeds.
 
 import datetime
 import re
+import urllib
 
 import feedparser
 from bs4 import BeautifulSoup
@@ -48,6 +49,15 @@ def sanitise_html(html: str) -> str:
     return output
 
 
+def sanitise_url(url: str) -> str:
+    """
+    Cleans up a url by removing the query parameter.
+    """
+    temp = list(urllib.parse.urlparse(url))
+    temp[4] = ""
+    return urllib.parse.urlunparse(temp)
+
+
 class FeedEntry:
     """
     A single entry from an RSS feed.
@@ -67,7 +77,7 @@ class FeedEntry:
         return cls(
             title=entry.get("title"),
             summary=entry.get("summary"),
-            link=entry.get("link"),
+            link=sanitise_url(entry.get("link")),
             time=time,
             feed=feed.feed.get("title"),
             source=feed.get("href"),
