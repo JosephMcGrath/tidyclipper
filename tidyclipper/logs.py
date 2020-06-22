@@ -11,7 +11,7 @@ def configure_logging(log_name: str) -> None:
         "disable_existing_loggers": True,
         "formatters": {
             "standard": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"},
-            "file": {"format": "%(asctime)s %(levelname)s\t %(name)s - %(message)s"},
+            "file": {"format": "%(asctime)s %(levelname)s\t %(name)s\t- %(message)s"},
         },
         "handlers": {
             "default": {
@@ -26,8 +26,8 @@ def configure_logging(log_name: str) -> None:
                 "class": "logging.handlers.RotatingFileHandler",
                 "filename": "TidyClipper.log",
                 "mode": "a",
-                "maxBytes": 10485760,
-                "backupCount": 5,
+                "maxBytes": 1000000,
+                "backupCount": 3,
             },
         },
         "loggers": {
