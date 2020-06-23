@@ -12,7 +12,7 @@ with open(HERE / "readme.md", encoding = "utf-8") as f:
 # This call to setup() does all the work
 setup(
     name="tidyclipper",
-    version="20.06.01",
+    version="20.06.02",
     description="A RSS aggregation / clipping tool.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -31,4 +31,5 @@ setup(
     package_dir={"": "src"},
     include_package_data=True,
     install_requires=["jinja2", "requests", "feedparser", "beautifulsoup4"],
+    entry_points={"console_scripts": ["tidyclipper=tidyclipper.__main__:main"]},
 )
