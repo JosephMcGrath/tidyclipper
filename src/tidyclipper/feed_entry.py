@@ -21,14 +21,6 @@ def sanitise_html(html: str) -> str:
     if html is None:
         return ""
 
-    # Wipe out unwwanted tags entirely
-    html = re.sub(r"<\/?html>", "", html)
-    html = re.sub(r"<\/?body>", "", html)
-    html = re.sub(r"<\/?div>", "", html)
-    html = re.sub(r"<\/?span>", "", html)
-
-    html = re.sub(r"(\s)+", r"\1", html)
-
     soup = BeautifulSoup(html, "lxml")
 
     # Don't want these tags:
@@ -42,10 +34,22 @@ def sanitise_html(html: str) -> str:
             tag.attrs = {
                 key: value for key, value in tag.attrs.items() if key == "href"
             }
+    # Remove tags without text
+    for x in soup.find_all():
+        if len(x.get_text(strip=True)) == 0:
+            x.extract()
 
     output = soup.prettify()
+    # Wipe out unwwanted tags entirely
+    output = re.sub(r"<\/?html>", "", output)
+    output = re.sub(r"<\/?body>", "", output)
+    output = re.sub(r"<\/?div>", "", output)
+    output = re.sub(r"<\/?span>", "", output)
+
+    output = re.sub(r"(\s)+", r"\1", output)
     output = re.sub(r"<(\/?)h1>", r"<\1h3>", output)
     output = re.sub(r"<(\/?)h2>", r"<\1h3>", output)
+    output = output.strip()
     return output
 
 
