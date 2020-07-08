@@ -33,12 +33,12 @@ class FeedClipper:
         try:
             raw = self.session.get(url, timeout=1)
             feed = feedparser.parse(raw.text)
+            feed["href"] = raw.url
+            new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
         except:
             logger.debug("Failed to fetch.")
             self.database.deactivate_feed(url)
             return
-        feed["href"] = raw.url
-        new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
         logger.debug("Finished fetching feed (%s entries).", len(new_entries))
         self.database.write_entries(new_entries)
 

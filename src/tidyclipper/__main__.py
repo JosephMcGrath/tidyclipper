@@ -13,7 +13,12 @@ def main():
     Run the tool via a command-line tool that picks up a JSON file.
     """
     parser = argparse.ArgumentParser(description="RSS aggregator / clipping.")
-    parser.add_argument("-config", type=str, help="Config path.", default=os.getcwd())
+    parser.add_argument(
+        "config",
+        type=str,
+        help="Config path.",
+        default=os.path.join(os.getcwd(), "config.json"),
+    )
 
     args = parser.parse_args()
 
