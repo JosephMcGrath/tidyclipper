@@ -107,7 +107,7 @@ class FeedDatabase:
             if x[1] >= x[2] or random.random() > x[1] / x[2]
         ]
 
-    def update_feed(self, feed_url, success: bool) -> None:
+    def update_feed(self, feed_url: str, success: bool) -> None:
         """
         Set a feed to inactive.
         """

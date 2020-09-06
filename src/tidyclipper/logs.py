@@ -1,3 +1,7 @@
+"""
+Simple logging setup.
+"""
+
 import logging.config
 
 

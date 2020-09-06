@@ -8,7 +8,7 @@ import jinja2
 
 
 def _make_template(raw: str) -> jinja2.Template:
-    return jinja2.Environment(loader=jinja2.BaseLoader).from_string(raw)
+    return jinja2.Environment(loader=jinja2.BaseLoader()).from_string(raw)
 
 
 ENTRY = _make_template(

@@ -4,7 +4,7 @@ Tools to manage individual entries from RSS feeds.
 
 import datetime
 import re
-import urllib
+from urllib import parse
 
 import feedparser
 from bs4 import BeautifulSoup
@@ -24,8 +24,8 @@ def sanitise_html(html: str) -> str:
     soup = BeautifulSoup(html, "lxml")
 
     # Don't want these tags:
-    for tag in ["img", "script", "embed", "iframe", "hr"]:
-        for entry in soup.findAll(tag):
+    for tag_label in ["img", "script", "embed", "iframe", "hr"]:
+        for entry in soup.findAll(tag_label):
             entry.extract()
 
     # Don't want most attributes
@@ -35,9 +35,9 @@ def sanitise_html(html: str) -> str:
                 key: value for key, value in tag.attrs.items() if key == "href"
             }
     # Remove tags without text
-    for x in soup.find_all():
-        if len(x.get_text(strip=True)) == 0:
-            x.extract()
+    for target_tag in soup.find_all():
+        if len(target_tag.get_text(strip=True)) == 0:
+            target_tag.extract()
 
     output = soup.prettify()
     # Wipe out unwwanted tags entirely
@@ -57,9 +57,9 @@ def sanitise_url(url: str) -> str:
     """
     Cleans up a url by removing the query parameter.
     """
-    temp = list(urllib.parse.urlparse(url))
+    temp = list(parse.urlparse(url))
     temp[4] = ""
-    return urllib.parse.urlunparse(temp)
+    return parse.urlunparse(temp)
 
 
 class FeedEntry:

@@ -8,7 +8,7 @@ import os
 from .parse_config import parse_json
 
 
-def main():
+def main() -> None:
     """
     Run the tool via a command-line tool that picks up a JSON file.
     """
