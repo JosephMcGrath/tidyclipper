@@ -90,7 +90,10 @@ class FeedEntry:
     def __init__(
         self, title: str, summary: str, link: str, time: str, feed: str, source: str
     ):
-        self.title = title.strip()
+        if title is None:
+            self.title: str = "-"
+        else:
+            self.title = title.strip()
         self.summary = summary
         self.link = link
         self.time = time

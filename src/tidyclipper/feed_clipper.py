@@ -13,6 +13,12 @@ from .feed_entry import FeedEntry
 from .logs import LOG_NAME
 from .templates import CLIPPING
 
+REQUEST_ERROR = (
+    requests.exceptions.ReadTimeout,
+    requests.exceptions.ConnectTimeout,
+    requests.exceptions.ConnectionError,
+)
+
 
 class FeedClipper:
     """
@@ -36,7 +42,7 @@ class FeedClipper:
             feed["href"] = raw.url
             new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
             self.database.update_feed(url, success=True)
-        except requests.exceptions.ReadTimeout:
+        except REQUEST_ERROR:
             logger.debug("Failed to fetch.")
             self.database.update_feed(url, success=False)
             return
