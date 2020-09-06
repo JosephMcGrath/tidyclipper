@@ -1,8 +1,6 @@
-@CALL %conda_activate%
+@CALL activate
 
-REM ROBOCOPY %~dp0\dist %package_local%
-
-REM @DEL %~dp0\dist /Q
+@DEL %~dp0\dist /Q
 
 @python setup.py sdist bdist_wheel > build.log
 ROBOCOPY %~dp0\dist %package_local%
@@ -10,6 +8,8 @@ ROBOCOPY %~dp0\dist %package_local%
 @pip uninstall tidyclipper -y >> build.log
 @ECHO ============================================================================================================================= >> build.log
 @pip install --no-index --find-links=file:%~dp0\dist tidyclipper >> build.log
+
+ROBOCOPY %~dp0\dist %package_local%
 
 @ECHO Done
 @PAUSE

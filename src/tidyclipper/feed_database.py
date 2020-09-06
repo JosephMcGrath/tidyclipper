@@ -1,9 +1,9 @@
 """
 Tools to store feed entries in an SQLite database.
 """
-
 import datetime
 import logging
+import random
 import re
 import sqlite3
 from typing import List
@@ -27,7 +27,7 @@ class FeedDatabase:
         statements = [
             """
             CREATE TABLE IF NOT EXISTS entry(
-                title TEXT
+              title TEXT
             , feed TEXT
             , link TEXT PRIMARY KEY
             , time TEXT
@@ -41,7 +41,8 @@ class FeedDatabase:
             CREATE TABLE IF NOT EXISTS feed (
                 url TEXT PRIMARY KEY
               , last_fetched TEXT NOT NULL
-              , to_fetch INTEGER DEFAULT(1)
+              , successful_fetches INTEGER DEFAULT(1)
+              , failed_fetches INTEGER DEFAULT(0)
             );
             """,
         ]
@@ -55,7 +56,7 @@ class FeedDatabase:
         Write a list of entries to the database.
         """
         logger = logging.getLogger(self.log_name)
-        logger.debug("Writing %s logs to disc.", len(entries))
+        logger.debug("Writing %s entries to the database.", len(entries))
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
             for entry in entries:
@@ -77,9 +78,9 @@ class FeedDatabase:
                 logger.debug("Updaing fetched status of %s.", feed)
                 cur.execute(
                     """
-                    INSERT OR REPLACE INTO feed
-                    (url, last_fetched)
-                    VALUES (?, ?);""",
+                    INSERT OR IGNORE INTO feed
+                    (url, last_fetched) VALUES (?, ?);
+                    """,
                     (feed, datetime.datetime.now().isoformat()),
                 )
 
@@ -94,23 +95,40 @@ class FeedDatabase:
             cur = conn.cursor()
             if sorting == "standard":
                 cur.execute(
-                    "SELECT url FROM feed WHERE to_fetch = 1 ORDER BY last_fetched ASC;"
+                    "SELECT url, successful_fetches, failed_fetches FROM feed ORDER BY last_fetched ASC;"
                 )
             elif sorting == "shuffle":
                 cur.execute(
-                    "SELECT url FROM feed WHERE to_fetch = 1 ORDER BY RANDOM();"
+                    "SELECT url, successful_fetches, failed_fetches FROM feed ORDER BY RANDOM();"
                 )
-            return [x[0] for x in cur.fetchall()]
+        return [
+            x[0]
+            for x in cur.fetchall()
+            if x[1] >= x[2] or random.random() > x[1] / x[2]
+        ]
 
-    def deactivate_feed(self, feed_url) -> None:
+    def update_feed(self, feed_url, success: bool) -> None:
         """
         Set a feed to inactive.
         """
         logger = logging.getLogger(self.log_name)
-        logger.debug("Deactivating feed: %s.", feed_url)
+        logger.debug("Updating feed: %s (success = %s).", feed_url, success)
         with sqlite3.connect(self.file) as conn:
             cur = conn.cursor()
-            cur.execute("UPDATE feed SET to_fetch = 0 WHERE url = ?;", (feed_url,))
+            cur.execute(
+                "UPDATE feed SET last_fetched = ? WHERE url = ?;",
+                (datetime.datetime.now().isoformat(), feed_url),
+            )
+            if success:
+                cur.execute(
+                    "UPDATE feed SET successful_fetches = successful_fetches + 1 WHERE url = ?;",
+                    (feed_url,),
+                )
+            else:
+                cur.execute(
+                    "UPDATE feed SET failed_fetches = failed_fetches + 1 WHERE url = ?;",
+                    (feed_url,),
+                )
 
     def search(self, regex: List[str]) -> List[FeedEntry]:
         """

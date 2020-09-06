@@ -12,7 +12,7 @@ with open(HERE / "readme.md", encoding="utf-8") as f:
 # This call to setup() does all the work
 setup(
     name="tidyclipper",
-    version="20.07.01",
+    version="20.09.01",
     description="A RSS aggregation / clipping tool.",
     long_description=README,
     long_description_content_type="text/markdown",

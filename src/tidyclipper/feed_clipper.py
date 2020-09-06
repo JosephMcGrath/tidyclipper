@@ -35,9 +35,10 @@ class FeedClipper:
             feed = feedparser.parse(raw.text)
             feed["href"] = raw.url
             new_entries = [FeedEntry.from_rss(x, feed) for x in feed.entries]
+            self.database.update_feed(url, success=True)
         except:
             logger.debug("Failed to fetch.")
-            self.database.deactivate_feed(url)
+            self.database.update_feed(url, success=False)
             return
         logger.debug("Finished fetching feed (%s entries).", len(new_entries))
         self.database.write_entries(new_entries)

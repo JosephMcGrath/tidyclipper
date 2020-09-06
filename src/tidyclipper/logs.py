@@ -35,7 +35,7 @@ def configure_logging(log_name: str) -> None:
                 "handlers": ["default", "rotating"],
                 "level": "DEBUG",
                 "propagate": False,
-            },
+            }
         },
     }
 
