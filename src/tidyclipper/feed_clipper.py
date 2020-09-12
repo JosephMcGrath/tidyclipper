@@ -17,6 +17,7 @@ REQUEST_ERROR = (
     requests.exceptions.ReadTimeout,
     requests.exceptions.ConnectTimeout,
     requests.exceptions.ConnectionError,
+    requests.exceptions.TooManyRedirects,
 )
 
 
